@@ -17,3 +17,21 @@ export const retornaNomeSegundaTransportadoraMaisBarata = (resultados) => {
 
     return transportadoraMaisBarata ? transportadoraMaisBarata.codigo : null;
 }
+
+export const retornaNomeTransportadoraMaisRapida = (resultados) => {
+    const allResults = [].concat(...resultados);
+    
+    const menorPrazo = Calculos.retornaMenorPrazo(resultados);
+    const transportadoraMaisRapida = allResults.find(resultado => resultado.prazoFinal === menorPrazo);
+
+    return transportadoraMaisRapida ? transportadoraMaisRapida.codigo : null;
+}
+
+export const retornaNomeSegundaTransportadoraMaisRapida = (resultados) => {
+    const allResults = [].concat(...resultados);
+    
+    const menorPrazo = Calculos.retornaSegundoMenorPrazo(resultados);
+    const transportadoraMaisRapida = allResults.find(resultado => resultado.prazoFinal === menorPrazo);
+
+    return transportadoraMaisRapida ? transportadoraMaisRapida.codigo : null;
+}

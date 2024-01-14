@@ -1,16 +1,24 @@
 import './Servico.css'
 import '../App.css';
 import React, { useEffect, useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 import {
     calculaMediaMenoresValoresFrete,
     retornaMenorValor,
     retornaSegundoMenorValor,
     calculaDiferencaMenoresValoresFrete,
     retornaQuantidadeCotacoes,
-    retornaQuantidadeTransportadorasCotadas
+    retornaQuantidadeTransportadorasCotadas,
+    retornaMenorPrazo,
+    retornaSegundoMenorPrazo
 } from '../Utils/Calculos'
 
-import { retornaNomeTransportadoraMaisBarata, retornaNomeSegundaTransportadoraMaisBarata } from '../Utils/Filtros'
+import {
+    retornaNomeTransportadoraMaisBarata,
+    retornaNomeSegundaTransportadoraMaisBarata,
+    retornaNomeTransportadoraMaisRapida,
+    retornaNomeSegundaTransportadoraMaisRapida
+} from '../Utils/Filtros'
 import { formatarData, formatarMoeda } from '../Utils/Formatacoes';
 import axios from 'axios'
 
@@ -21,19 +29,29 @@ function Servico() {
 
     const [totalCotacoes, setTotalCotacoes] = useState();
     const [totalTransportadorasCotadas, setTotalTransportadorasCotadas] = useState();
-    const [menorValor, setMenorValor] = useState();
-    const [segundoMenorValor, setSegundoMenorValor] = useState();
-    const [valorMediaMenorValor, setValorMediaMenorValor] = useState();
-    const [valorDiferencaMenoresValores, setValorDiferencaMenoresValores] = useState();
-    const [nomeTransportadoraMaisBarata, setNomeTransportadoraMaisBarata] = useState();
-    const [nomeSegundaTransportadoraMaisBarata, setNomeSegundaTransportadoraMaisBarata] = useState();
 
+    const [freteInfo, setFreteInfo] = useState({
+        menorValor: undefined,
+        segundoMenorValor: undefined,
+        valorMediaMenorValor: undefined,
+        valorDiferencaMenoresValores: undefined,
+        quantidadeCotacoes: undefined,
+        quantidadeTransportadorasCotadas: undefined,
+        menorPrazo: undefined,
+        segundoMenorPrazo: undefined,
+        nomeTransportadoraMaisBarata: undefined,
+        nomeSegundaTransportadoraMaisBarata: undefined,
+        nomeTransportadoraMaisRapida: undefined,
+        nomeSegundaTransportadoraMaisRapida: undefined
+    });
+      
     const [servico, setServico] = useState({
         cepOrigem: '',
         cepDestino: '',
         altura: '',
         largura: '',
-        peso: ''
+        peso: '',
+        valor: ''
     })
 
     const servicoPayload = {
@@ -41,22 +59,22 @@ function Servico() {
         "cepOrigem": servico.cepOrigem,
         "cepDestino": servico.cepDestino,
         "dimensaoCalculo": "altura",
-        "valorDeclarado": 50,
+        "valorDeclarado": Number(servico.valor && servico.valor ? servico.valor.replace(',', '.') : 0),
         "produtos": [
             {
-                "altura": Number(servico.altura),
-                "largura": Number(servico.largura),
-                "comprimento": Number(servico.comprimento),
-                "peso": Number(servico.peso),
+                "altura": Number(servico.altura && servico.altura.replace ? servico.altura.replace(',', '.') : 0),
+                "largura": Number(servico.largura && servico.largura.replace ? servico.largura.replace(',', '.') : 0),
+                "comprimento": Number(servico.comprimento && servico.comprimento.replace ? servico.comprimento.replace(',', '.') : 0),
+                "peso": Number(servico.peso && servico.peso.replace ? servico.peso.replace(',', '.') : 0),
                 "quantidade": 1,
-                "valor": 50,
+                "valor": Number(servico.valor && servico.valor.replace ? servico.valor.replace(',', '.') : 0),
                 "volumes": 1,
                 "volumesDetalhes": [
                     {
-                        "peso": Number(servico.peso),
-                        "altura": Number(servico.altura),
-                        "largura": Number(servico.largura),
-                        "comprimento": Number(servico.comprimento)
+                        "peso": Number(servico.peso && servico.peso.replace ? servico.peso.replace(',', '.') : 0),
+                        "altura": Number(servico.altura && servico.altura.replace ? servico.altura.replace(',', '.') : 0),
+                        "largura": Number(servico.largura && servico.largura.replace ? servico.largura.replace(',', '.') : 0),
+                        "comprimento": Number(servico.comprimento && servico.comprimento.replace ? servico.comprimento.replace(',', '.') : 0)
                     }
                 ]
             }
@@ -68,7 +86,9 @@ function Servico() {
                     "EXP",
                     "BAU",
                     "TNT",
-                    "NTV"
+                    "NTV",
+                    "JAD-EC",
+                    "JAD-EX"
                 ]
             }, {
                 "identificador": "melhorEnvio",
@@ -88,7 +108,12 @@ function Servico() {
             {
                 "identificador": "flixlog",
                 "servicos": [
-                    "FLIX"
+                    "FLIX",
+                    "FLIX193",
+                    "FLIX256",
+                    "FLIX18",
+                    "FLIX182",
+                    "FLIX10"
                 ]
             },
             {
@@ -121,20 +146,86 @@ function Servico() {
             "ACE",
             "ATC",
             "PMC",
-            "SAT"
+            "SAT",
+            "AST",
+            "ARL",
+            "AZC",
+            "BAR",
+            "BRS",
+            "BRP",
+            "BSP",
+            "BSF",
+            "BRE",
+            "BUM",
+            "BUR",
+            "BSJ",
+            "BUS-RS",
+            "BSC",
+            "BUP",
+            "CAR",
+            "CSP",
+            "CPX",
+            "PAC",
+            "DAM",
+            "DBA",
+            "DSP",
+            "DES",
+            "DIC",
+            "DKT",
+            "DLO",
+            "DML",
+            "FDX",
+            "GFL",
+            "GFP",
+            "ITL",
+            "JAD-EC",
+            "JAD-EX",
+            "JDL",
+            "JMF",
+            "LAT",
+            "LGG",
+            "NEX",
+            "NSP",
+            "NTL",
+            "NRE",
+            "ORN",
+            "PLA",
+            "PTX",
+            "RRS",
+            "RPR",
+            "RES",
+            "REU",
+            "RSP",
+            "ROD",
+            "RLE",
+            "RPE",
+            "RDP",
+            "RDC",
+            "RDN",
+            "STO",
+            "TRO",
+            "UEL",
+            "ZNT"
         ]
     }
 
     const handleChange = (event) => {
+        
         setServico({ ...servico, [event.target.name]: event.target.value })
     }
 
     const handleTokenChange = (event) => {
         setTokenInput(event.target.value);
-      }
+    }
 
     const handleConsultar = async (event) => {
         event.preventDefault()
+
+        if (!servico.cepOrigem || !servico.cepDestino || !servico.altura || !servico.largura || !servico.peso || !tokenInput || !servico.valor || !servico.comprimento) {
+            toast.error("Atenção! TODOS os campos devem ser preenchidos!");
+            return;
+        }
+
 
         try {
             // Limpa o estado antes de fazer novas consultas
@@ -143,7 +234,7 @@ function Servico() {
             const tokensDoCliente = tokenInput.split(',');
 
             const requests = tokensDoCliente.map(async (token) => {
-                const tokenizedPayload = { ...servicoPayload, cliente: token.trim(), servico };
+                const tokenizedPayload = { ...servicoPayload, cliente: token.trim() };
                 const result = await axios.post(baseURL, tokenizedPayload);
                 console.log(`Resultados para o token ${token}:`, result.data.servicos);
                 return result.data.servicos;
@@ -156,6 +247,8 @@ function Servico() {
             handleImprimir(results)
 
             limparCampos();
+
+            toast.success("Cotação efetuada com sucesso!");
 
         } catch (error) {
             console.error('Erro ao consultar:', error);
@@ -176,11 +269,20 @@ function Servico() {
     const gerarCalculos = (resultados) => {
         setTotalCotacoes(retornaQuantidadeCotacoes(resultados));
         setTotalTransportadorasCotadas(retornaQuantidadeTransportadorasCotadas(resultados))
-        setMenorValor(retornaMenorValor(resultados));
-        setSegundoMenorValor(retornaSegundoMenorValor(resultados));
-        setValorDiferencaMenoresValores(calculaDiferencaMenoresValoresFrete(resultados));
-        setNomeTransportadoraMaisBarata(retornaNomeTransportadoraMaisBarata(resultados));
-        setNomeSegundaTransportadoraMaisBarata(retornaNomeSegundaTransportadoraMaisBarata(resultados));
+
+        setFreteInfo({
+            menorValor: retornaMenorValor(resultados),
+            segundoMenorValor: retornaSegundoMenorValor(resultados),
+            valorMediaMenorValor: calculaMediaMenoresValoresFrete(resultados),
+            valorDiferencaMenoresValores: calculaDiferencaMenoresValoresFrete(resultados),
+            quantidadeCotacoes: retornaQuantidadeCotacoes(resultados),
+            quantidadeTransportadorasCotadas: retornaQuantidadeTransportadorasCotadas(resultados),
+            menorPrazo: retornaMenorPrazo(resultados),
+            segundoMenorPrazo: retornaSegundoMenorPrazo(resultados),
+            nomeTransportadoraMaisBarata: retornaNomeTransportadoraMaisBarata(resultados),
+            nomeSegundaTransportadoraMaisBarata: retornaNomeSegundaTransportadoraMaisBarata(resultados),
+            nomeTransportadoraMaisRapida: retornaNomeTransportadoraMaisRapida(resultados),            
+        });
     }
 
     const handleImprimir = (resultados) => {
@@ -204,7 +306,7 @@ function Servico() {
                     <div class="row mb-3">
                         <label htmlFor="tokens" className='col-sm-2 col-form-label'>Tokens</label>
                         <div class="col-sm-10">
-                            <textarea onChange={handleTokenChange} value={tokenInput || ''} name='tokens' type="text" className='form-control input-style' id='tokens' placeholder='Informe os tokens separados por vírgula, ex: CASA-EPGI-UTJF-PUQC, DECO-KMWG-XDRI-KNNB,'/>
+                            <textarea onChange={handleTokenChange} value={tokenInput || ''} name='tokens' type="text" className='form-control input-style' id='tokens' placeholder='Informe os tokens separados por vírgula, ex: CASA-EPGI-UTJF-PUQC, DECO-KMWG-XDRI-KNNB,' />
                         </div>
                     </div>
 
@@ -245,6 +347,13 @@ function Servico() {
                     </div>
 
                     <div class="row mb-3">
+                        <label htmlFor="tokens" className='col-sm-2 col-form-label'>Valor</label>
+                        <div class="col-sm-4">
+                            <input onChange={handleChange} value={servico.valor || ''} name='valor' type="text" className='form-control input-style' id='valor' />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <div className="col-sm-5 text-center"> {/* Utilize ml-auto para a margem à esquerda automática */}
                             <input type="submit" className='btn btn-primary col-sm-4' value="Efetuar Cotação" /> {/* Utilize col-sm-12 para ocupar toda a largura da coluna */}
                         </div>
@@ -262,22 +371,22 @@ function Servico() {
                 <div className="card card-unit text-white bg-primary mb-4">
                     <div className="card-header">Menor valor de frete</div>
                     <div className="card-body">
-                        <h5 className="card-title">Transportadora: {nomeTransportadoraMaisBarata}</h5>
-                        <p className="card-text fw-bold">{menorValor !== undefined ? formatarMoeda(menorValor) : 'R$ 0,00'}</p>
+                        <h5 className="card-title">Transportadora: {freteInfo.nomeTransportadoraMaisBarata}</h5>
+                        <p className="card-text fw-bold">{freteInfo.menorValor !== undefined ? formatarMoeda(freteInfo.menorValor) : 'R$ 0,00'}</p>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-secondary mb-4 mr-3">
                     <div className="card-header">Segundo menor valor de frete</div>
                     <div className="card-body">
-                        <h5 className="card-title">Transportadora: {nomeSegundaTransportadoraMaisBarata}</h5>
-                        <p className="card-text fw-bold">{segundoMenorValor !== undefined ? formatarMoeda(segundoMenorValor) : 'R$ 0,00'}</p>
+                        <h5 className="card-title">Transportadora: {freteInfo.nomeSegundaTransportadoraMaisBarata}</h5>
+                        <p className="card-text fw-bold">{freteInfo.segundoMenorValor !== undefined ? formatarMoeda(freteInfo.segundoMenorValor) : 'R$ 0,00'}</p>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-success mb-4">
                     <div className="card-header"><strong>&lt;&gt;</strong> entre menor e segundo menor</div>
                     <div className="card-body">
-                        <h5 className="card-title">Success card title</h5>
-                        <p className="card-text fw-bold">{valorDiferencaMenoresValores !== undefined ? formatarMoeda(valorDiferencaMenoresValores) : 'R$ 0,00'}</p>
+                        <h5 className="card-title">Resultado</h5>
+                        <p className="card-text fw-bold">{freteInfo.valorDiferencaMenoresValores !== undefined ? formatarMoeda(freteInfo.valorDiferencaMenoresValores) : 'R$ 0,00'}</p>
                     </div>
                 </div>
             </div>
@@ -286,22 +395,22 @@ function Servico() {
                 <div className="card card-unit text-white bg-primary mb-4">
                     <div className="card-header">Menor prazo de entrega </div>
                     <div className="card-body">
-                        <h5 className="card-title">Primary card title</h5>
-                        <p className="card-text fw-bold">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h5 className="card-title">Transportadora: {freteInfo.nomeTransportadoraMaisRapida}</h5>
+                        <p className="card-text fw-bold">{freteInfo.menorPrazo !== undefined ? freteInfo.menorPrazo + " dia(s)" : '0'}</p>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-secondary mb-4 mr-3">
                     <div className="card-header">Segundo menor prazo</div>
                     <div className="card-body">
-                        <h5 className="card-title">Secondary card title</h5>
-                        <p className="card-text fw-bold">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h5 className="card-title">Transportadora: {freteInfo.nomeSegundaTransportadoraMaisRapida}</h5>
+                        <p className="card-text fw-bold">{freteInfo.segundoMenorPrazo !== undefined ? freteInfo.segundoMenorPrazo + " dia(s)" : '0'}</p>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-success mb-4">
                     <div className="card-header"><strong>&lt;&gt;</strong> menor e segundo menor prazo</div>
                     <div className="card-body">
-                        <h5 className="card-title">Success card title</h5>
-                        <p className="card-text fw-bold">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h5 className="card-title">Resultado</h5>
+                        <p className="card-text fw-bold"></p>
                     </div>
                 </div>
             </div>

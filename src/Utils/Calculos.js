@@ -6,6 +6,14 @@ const valoresPreparados = (resultados) => {
     return valoresOrdenados;
 }
 
+const prazosPreparados = (resultados) => {
+    const allResults = [].concat(...resultados);
+    const valoresFrete = allResults.map(resultado => resultado.prazoFinal);
+    const valoresOrdenados = valoresFrete.sort((a, b) => a - b);
+
+    return valoresOrdenados;
+}
+
 export const retornaQuantidadeCotacoes = (resultados) => {
     const allResults = [].concat(...resultados);
     return allResults.length;
@@ -88,6 +96,22 @@ export const retornaSegundoMenorValor = (resultados) => {
     const valoresOrdenados = valoresPreparados(resultados);
     const menor = valoresOrdenados[0];
     const segundo = valoresOrdenados.find(valor => valor !== menor);
+
+    return segundo;
+}
+
+
+export const retornaMenorPrazo = (resultados) => {
+    const valoresOrdenados = prazosPreparados(resultados);
+    const menor = valoresOrdenados[0];
+
+    return menor;
+}
+
+export const retornaSegundoMenorPrazo = (resultados) => {
+    const valoresOrdenados = prazosPreparados(resultados);
+    const menor = valoresOrdenados[0];
+    const segundo = valoresOrdenados.find(prazoFinal => prazoFinal !== menor);
 
     return segundo;
 }
