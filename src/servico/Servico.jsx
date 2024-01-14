@@ -28,16 +28,6 @@ function Servico() {
     const [nomeTransportadoraMaisBarata, setNomeTransportadoraMaisBarata] = useState();
     const [nomeSegundaTransportadoraMaisBarata, setNomeSegundaTransportadoraMaisBarata] = useState();
 
-    //const [tokens, setTokens] = useState([])
-
-    // const tokens = [
-    //     "CASA-EPGI-UTJF-PUQC",
-    //     "DECO-KMWG-XDRI-KNNB",
-    //     "GAMM-VZXQ-WPWT-WPGD",
-    //     "ATRA-QGNA-RKRA-OQOF",
-    //     "DKAD-FXSR-ZHSW-EPXM"
-    // ]
-
     const [servico, setServico] = useState({
         cepOrigem: '',
         cepDestino: '',
