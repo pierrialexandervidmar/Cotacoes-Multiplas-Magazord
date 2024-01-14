@@ -1,0 +1,94 @@
+.card-unique  {
+    justify-content: space-between;
+}
+
+.card-unit {
+    max-width: 20rem;
+    margin-right: 2rem;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu');
+
+body {
+  color: #010409;
+  font-family: 'Ubuntu', sans-serif;
+  background: #ffffff;  /* Fundo branco */
+}
+
+.titulo {
+  margin-top: 15px;
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+
+/* Estilo para inputs */
+.input-style {
+  background-color: #f5f5f5; /* Cor de fundo do input */
+  color: #333333; /* Cor do texto do input */
+  border: 1px solid #dddddd; /* Borda do input */
+  padding: 8px; /* Espaçamento interno */
+  margin-bottom: 10px; /* Espaçamento inferior */
+  width: 100%; /* Ocupa toda a largura disponível */
+  box-sizing: border-box; /* Garante que a largura inclui a borda e o preenchimento */
+}
+
+.input-style:focus {
+  outline: none; /* Remove a borda de foco padrão */
+  border-color: #007bff; /* Cor da borda ao receber foco */
+}
+
+/* Estilo para botão CSV */
+.botao-csv {
+  text-indent: -9999px;
+  width: 40px;
+  height: 25px;
+  background-color: #007bff; /* Cor de fundo do botão */
+  border: none; /* Remover a borda do botão */
+}
+
+/* Estilo para botões de ação */
+.tamanho-botao {
+  padding: 8px 12px; /* Espaçamento interno */
+  font-size: 13px;
+  margin-right: 5px; /* Espaçamento direito entre botões */
+}
+
+.botao-alterar,
+.botao-excluir,
+.botao-cancelar,
+.botao-reativar {
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.botao-alterar {
+  background: #374797;
+}
+
+.botao-alterar:hover {
+  background: #1f2858;
+}
+
+.botao-excluir {
+  background: #a02020;
+}
+
+.botao-excluir:hover {
+  background: #741717;
+}
+
+.botao-cancelar {
+  background: #d3a307;
+}
+
+.botao-cancelar:hover {
+  background: #634c04;
+}
+
+.botao-reativar {
+  background: #0d6efd;
+}
+
+.botao-reativar:hover {
+  background: #0a58ca;
+}
