@@ -93,7 +93,12 @@ export const retornaMenorValor = (resultados) => {
 export const retornaSegundoMenorValor = (resultados) => {
     const valoresOrdenados = valoresPreparados(resultados);
     const menor = valoresOrdenados[0];
-    const segundo = valoresOrdenados.find(valor => valor !== menor);
+    
+    // Filtrar valores iguais ao menor
+    const valoresDiferentesDoMenor = valoresOrdenados.filter(valor => valor !== menor);
+
+    // Encontrar o segundo menor valor
+    const segundo = valoresDiferentesDoMenor[0];
 
     return segundo;
 }
@@ -180,5 +185,21 @@ export const calculaMediaValorTransportadoraMaisCotada = (resultados) => {
     const media = somaValores / valoresFiltrados.length;
 
     return media;
+}
 
+export const calculaMediaOpcoesFreteCliente = (resultados) => {
+    // Inicializar variáveis para contar a quantidade total de arrays e objetos
+    let totalArrays = 0;
+    let totalObjetos = 0;
+
+    // Iterar sobre os resultados para contar a quantidade total de arrays e objetos
+    resultados.forEach((arraysDeObjetos) => {
+        totalArrays++;
+        totalObjetos += arraysDeObjetos.length;
+    });
+
+    // Calcular a média
+    const media = totalObjetos / totalArrays;
+
+    return media;
 }

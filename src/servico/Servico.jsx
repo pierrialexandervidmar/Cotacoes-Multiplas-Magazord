@@ -13,7 +13,8 @@ import {
     retornaSegundoMenorPrazo,
     calculaDiferencaMenoresPrazos,
     retornaTransportadoraMaisCotada,
-    calculaMediaValorTransportadoraMaisCotada
+    calculaMediaValorTransportadoraMaisCotada,
+    calculaMediaOpcoesFreteCliente
 } from '../Utils/Calculos'
 
 import {
@@ -56,7 +57,8 @@ function Servico() {
         nomeTransportadoraMaisRapida: undefined,
         nomeSegundaTransportadoraMaisRapida: undefined,
         transportadoraMaisCotada: undefined,
-        mediaValorTransportadoraMaisCotada: undefined
+        mediaValorTransportadoraMaisCotada: undefined,
+        mediaOpcoesFreteCliente: undefined
     });
       
     const [servico, setServico] = useState({
@@ -290,18 +292,19 @@ function Servico() {
             valorDiferencaMenoresPrazos: calculaDiferencaMenoresPrazos(resultados),
             transportadoraMaisCotada: retornaTransportadoraMaisCotada(resultados),
             mediaValorTransportadoraMaisCotada: calculaMediaValorTransportadoraMaisCotada(resultados),
+            mediaOpcoesFreteCliente: calculaMediaOpcoesFreteCliente(resultados),
         });
     }
 
     // ============================================================================================
 
     return (
-        <div className="container">
+        <div className="container p-0">
             <h1 className='titulo'>Cotações em múltiplos clientes</h1>
             <p>Obtenha a cotação em tempo real para múltiplos clientes/transportadoras</p>
             <br />
 
-            <form onSubmit={handleConsultar}>
+            <form onSubmit={handleConsultar} className='form-container'>
                 <div className='col-12'>
 
                     <div class="row mb-3">
@@ -355,17 +358,15 @@ function Servico() {
                     </div>
 
                     <div class="row mb-3">
-                        <div className="col-sm-5 text-center"> {/* Utilize ml-auto para a margem à esquerda automática */}
-                            <input type="submit" className='btn btn-primary col-sm-4' value="Efetuar Cotação" /> {/* Utilize col-sm-12 para ocupar toda a largura da coluna */}
-                        </div>
-                        <div className="col-sm-7">
+                        <div className="col-sm-7 total-cotacoes">
                             Total de Cotações Executadas: {totalCotacoes || 0} - Número de Transportadoras Captadas: {totalTransportadorasCotadas || 0}
+                        </div>
+                        <div className="col-sm-5 botao-submit"> {/* Utilize ml-auto para a margem à esquerda automática */}
+                            <input type="submit" className='btn btn-primary col-sm-8 btn-cotacao' value="Efetuar Cotação" /> {/* Utilize col-sm-12 para ocupar toda a largura da coluna */}
                         </div>
                     </div>
                 </div>
             </form>
-
-            <hr />
 
             {/* CARDS */}
             <div className="row mb-3 card-unique">
@@ -426,10 +427,10 @@ function Servico() {
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-secondary mb-4 mr-3">
-                    <div className="card-header">Título</div>
+                    <div className="card-header">Media de opções</div>
                     <div className="card-body">
-                        <h5 className="card-title">Subtítulo</h5>
-                        <p className="card-text">Conteúdo</p>
+                        <h5 className="card-title">Média de opções de frete por cliente</h5>
+                        <p className="card-text">Média: {freteInfo.mediaOpcoesFreteCliente !== undefined ? freteInfo.mediaOpcoesFreteCliente : "0"}</p>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-success mb-4">
