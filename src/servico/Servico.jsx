@@ -1,7 +1,7 @@
 import './Servico.css'
 import '../App.css';
-import React, { useEffect, useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import {
     calculaMediaMenoresValoresFrete,
     retornaMenorValor,
@@ -10,7 +10,10 @@ import {
     retornaQuantidadeCotacoes,
     retornaQuantidadeTransportadorasCotadas,
     retornaMenorPrazo,
-    retornaSegundoMenorPrazo
+    retornaSegundoMenorPrazo,
+    calculaDiferencaMenoresPrazos,
+    retornaTransportadoraMaisCotada,
+    calculaMediaValorTransportadoraMaisCotada
 } from '../Utils/Calculos'
 
 import {
@@ -19,12 +22,20 @@ import {
     retornaNomeTransportadoraMaisRapida,
     retornaNomeSegundaTransportadoraMaisRapida
 } from '../Utils/Filtros'
-import { formatarData, formatarMoeda } from '../Utils/Formatacoes';
+import { formatarMoeda } from '../Utils/Formatacoes';
 import axios from 'axios'
 
+
+/**
+ * Componente React para realizar cotações de frete em tempo real para múltiplos clientes/transportadoras.
+ * 
+ * @module Servico
+ * @component
+ * @author Pierri Alexander Vidmar
+ * @since 2024-01-01
+ */
 function Servico() {
-    const baseURL = 'https://api-transporte.magazord.com.br/api/v1/calculoFrete'
-    const [servicos, setServicos] = useState([]);
+    const baseURL = 'https://api-transporte.magazord.com.br/api/v1/calculoFrete';
     const [tokenInput, setTokenInput] = useState('');
 
     const [totalCotacoes, setTotalCotacoes] = useState();
@@ -39,10 +50,13 @@ function Servico() {
         quantidadeTransportadorasCotadas: undefined,
         menorPrazo: undefined,
         segundoMenorPrazo: undefined,
+        valorDiferencaMenoresPrazos: undefined,
         nomeTransportadoraMaisBarata: undefined,
         nomeSegundaTransportadoraMaisBarata: undefined,
         nomeTransportadoraMaisRapida: undefined,
-        nomeSegundaTransportadoraMaisRapida: undefined
+        nomeSegundaTransportadoraMaisRapida: undefined,
+        transportadoraMaisCotada: undefined,
+        mediaValorTransportadoraMaisCotada: undefined
     });
       
     const [servico, setServico] = useState({
@@ -228,9 +242,6 @@ function Servico() {
 
 
         try {
-            // Limpa o estado antes de fazer novas consultas
-            setServicos([]);
-
             const tokensDoCliente = tokenInput.split(',');
 
             const requests = tokensDoCliente.map(async (token) => {
@@ -241,15 +252,9 @@ function Servico() {
             });
 
             const results = await Promise.all(requests);
-            setServicos(results);
-
             gerarCalculos(results)
-            handleImprimir(results)
-
             limparCampos();
-
             toast.success("Cotação efetuada com sucesso!");
-
         } catch (error) {
             console.error('Erro ao consultar:', error);
         }
@@ -269,7 +274,6 @@ function Servico() {
     const gerarCalculos = (resultados) => {
         setTotalCotacoes(retornaQuantidadeCotacoes(resultados));
         setTotalTransportadorasCotadas(retornaQuantidadeTransportadorasCotadas(resultados))
-
         setFreteInfo({
             menorValor: retornaMenorValor(resultados),
             segundoMenorValor: retornaSegundoMenorValor(resultados),
@@ -282,14 +286,11 @@ function Servico() {
             nomeTransportadoraMaisBarata: retornaNomeTransportadoraMaisBarata(resultados),
             nomeSegundaTransportadoraMaisBarata: retornaNomeSegundaTransportadoraMaisBarata(resultados),
             nomeTransportadoraMaisRapida: retornaNomeTransportadoraMaisRapida(resultados),            
+            nomeSegundaTransportadoraMaisRapida: retornaNomeSegundaTransportadoraMaisRapida(resultados),
+            valorDiferencaMenoresPrazos: calculaDiferencaMenoresPrazos(resultados),
+            transportadoraMaisCotada: retornaTransportadoraMaisCotada(resultados),
+            mediaValorTransportadoraMaisCotada: calculaMediaValorTransportadoraMaisCotada(resultados),
         });
-    }
-
-    const handleImprimir = (resultados) => {
-        console.log(resultados);
-        console.log('Menor Valor: ' + retornaMenorValor(resultados));
-        console.log('Segundo Menor Valor: ' + retornaSegundoMenorValor(resultados));
-        console.log('Média: ' + calculaMediaMenoresValoresFrete(resultados));
     }
 
     // ============================================================================================
@@ -385,8 +386,8 @@ function Servico() {
                 <div className="card card-unit text-white bg-success mb-4">
                     <div className="card-header"><strong>&lt;&gt;</strong> entre menor e segundo menor</div>
                     <div className="card-body">
-                        <h5 className="card-title">Resultado</h5>
-                        <p className="card-text fw-bold">{freteInfo.valorDiferencaMenoresValores !== undefined ? formatarMoeda(freteInfo.valorDiferencaMenoresValores) : 'R$ 0,00'}</p>
+                        <h5 className="card-title">Resultado:</h5>
+                        <p className="card-text fw-bold">{freteInfo.valorDiferencaMenoresValores !== undefined ? formatarMoeda(freteInfo.valorDiferencaMenoresValores)  + " de diferença": 'R$ 0,00'}</p>
                     </div>
                 </div>
             </div>
@@ -409,32 +410,33 @@ function Servico() {
                 <div className="card card-unit text-white bg-success mb-4">
                     <div className="card-header"><strong>&lt;&gt;</strong> menor e segundo menor prazo</div>
                     <div className="card-body">
-                        <h5 className="card-title">Resultado</h5>
-                        <p className="card-text fw-bold"></p>
+                        <h5 className="card-title">Resultado:</h5>
+                        <p className="card-text fw-bold">{freteInfo.valorDiferencaMenoresPrazos !== undefined ? freteInfo.valorDiferencaMenoresPrazos + " dia(s) de diferença" : '0'}</p>
                     </div>
                 </div>
             </div>
 
             <div className="row mb-3 card-unique">
                 <div className="card card-unit text-white bg-primary mb-4">
-                    <div className="card-header">Menor prazo de entrega </div>
+                <div className="card-header">Transportadora + captou</div>
                     <div className="card-body">
-                        <h5 className="card-title">Primary card title</h5>
-                        <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h5 className="card-title">Transportadora: {freteInfo.transportadoraMaisCotada?.codigoMaisCotado || ''}</h5>
+                        <h5 className="card-title">Quantidade: {freteInfo.transportadoraMaisCotada?.contagemMaisCotada && freteInfo.transportadoraMaisCotada?.contagemMaisCotada  + ' vezes' || ''}</h5>
+                        <h5 className="card-title">Valor Média: {freteInfo.mediaValorTransportadoraMaisCotada !== undefined ? formatarMoeda(freteInfo.mediaValorTransportadoraMaisCotada) || '' : "R$ 0,00"}</h5>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-secondary mb-4 mr-3">
-                    <div className="card-header">Segundo menor prazo</div>
+                    <div className="card-header">Título</div>
                     <div className="card-body">
-                        <h5 className="card-title">Secondary card title</h5>
-                        <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h5 className="card-title">Subtítulo</h5>
+                        <p className="card-text">Conteúdo</p>
                     </div>
                 </div>
                 <div className="card card-unit text-white bg-success mb-4">
-                    <div className="card-header">Transportadora + captou</div>
+                <div className="card-header">Título</div>
                     <div className="card-body">
-                        <h5 className="card-title">Success card title</h5>
-                        <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <h5 className="card-title">Subtítulo</h5>
+                        <p className="card-text">Conteúdo</p>
                     </div>
                 </div>
             </div>

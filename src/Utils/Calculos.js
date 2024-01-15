@@ -67,7 +67,6 @@ export const retornaListaTransportadorasCotadas = (resultados) => {
 }
 
 export const calculaMediaMenoresValoresFrete = (resultados) => {
-    const valoresOrdenados = valoresPreparados(resultados);
     const menor = retornaMenorValor(resultados)
     const segundo = retornaSegundoMenorValor(resultados)
     const media = (menor + segundo) / 2;
@@ -76,7 +75,6 @@ export const calculaMediaMenoresValoresFrete = (resultados) => {
 }
 
 export const calculaDiferencaMenoresValoresFrete = (resultados) => {
-    const valoresOrdenados = valoresPreparados(resultados);
     const menor = retornaMenorValor(resultados)
     const segundo = retornaSegundoMenorValor(resultados)
     const diferenca = segundo - menor;
@@ -111,7 +109,76 @@ export const retornaMenorPrazo = (resultados) => {
 export const retornaSegundoMenorPrazo = (resultados) => {
     const valoresOrdenados = prazosPreparados(resultados);
     const menor = valoresOrdenados[0];
-    const segundo = valoresOrdenados.find(prazoFinal => prazoFinal !== menor);
+
+    // Filtrar valores iguais ao menor
+    const valoresDiferentesDoMenor = valoresOrdenados.filter(valor => valor !== menor);
+
+    // Encontrar o segundo menor valor
+    const segundo = valoresDiferentesDoMenor[0];
 
     return segundo;
+}
+
+
+export const calculaDiferencaMenoresPrazos = (resultados) => {
+    const menor = retornaMenorPrazo(resultados)
+    const segundo = retornaSegundoMenorPrazo(resultados)
+    const diferenca = segundo - menor;
+
+    return diferenca;
+}
+
+
+export const retornaTransportadoraMaisCotada = (resultados) => {
+    const allResults = [].concat(...resultados.flat());
+
+    const result = allResults.reduce((acumulador, item) => {
+        const { codigo } = item;
+
+        if (acumulador[codigo] === undefined) {
+            acumulador[codigo] = 1;
+        } else {
+            acumulador[codigo]++;
+        }
+
+        return acumulador;
+    }, {});
+
+    let codigoMaisCotado;
+    let contagemMaisCotada = 0;
+
+    for (const codigo in result) {
+        if (result.hasOwnProperty(codigo)) {
+            const contagemCotada = result[codigo];
+            if (contagemCotada > contagemMaisCotada) {
+                codigoMaisCotado = codigo;
+                contagemMaisCotada = contagemCotada;
+            }
+        }
+    }
+
+    return {
+        codigoMaisCotado,
+        contagemMaisCotada
+    };
+};
+
+
+export const calculaMediaValorTransportadoraMaisCotada = (resultados) => {
+    const transportadoraMaisCotada = retornaTransportadoraMaisCotada(resultados);
+    const codigoMaisCotado = transportadoraMaisCotada.codigoMaisCotado;
+
+    const valoresFiltrados = [].concat(...resultados.flat())
+        .filter(resultado => resultado.codigo === codigoMaisCotado)
+        .map(resultado => resultado.valor);
+
+    if (valoresFiltrados.length === 0) {
+        return 0; // Ou qualquer valor padrão desejado caso não haja valores para a transportadora mais cotada.
+    }
+
+    const somaValores = valoresFiltrados.reduce((total, valor) => total + valor, 0);
+    const media = somaValores / valoresFiltrados.length;
+
+    return media;
+
 }
